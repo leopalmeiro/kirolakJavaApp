@@ -1,7 +1,8 @@
 package com.palmeiro;
 
 public enum CenterType {
-    MIRIBILLA(14);
+    MIRIBILLA(14),
+    ATXURI(11);
 
 
     private final int value;

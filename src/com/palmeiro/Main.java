@@ -30,9 +30,9 @@ public class Main {
 
     public static void main(String[] args) {
         LOGGER.info("Method: Main");
-        new Thread(() -> findReservation(UserType.PAOLA, CenterType.MIRIBILLA, SportType.SWIMMING)).start();
-        new Thread(() -> findReservation(UserType.LEO, CenterType.MIRIBILLA, SportType.SWIMMING)).start();
-        new Thread(() -> findReservation(UserType.TEO, CenterType.MIRIBILLA, SportType.SWIMMING)).start();
+        new Thread(() -> findReservation(UserType.PAOLA, CenterType.ATXURI, SportType.SWIMMING)).start();
+        new Thread(() -> findReservation(UserType.LEO, CenterType.ATXURI, SportType.SWIMMING)).start();
+        //new Thread(() -> findReservation(UserType.TEO, CenterType.MIRIBILLA, SportType.SWIMMING)).start();
 
     }
 
@@ -40,6 +40,7 @@ public class Main {
         //Create a new drive
         LOGGER.info("Method: findReservation " + user + " " + centerType + " " + sportType);
         System.setProperty("webdriver.chrome.driver", "/home/leonardo/Downloads/chromedriver_linux64/chromedriver");
+
         WebDriver driver = new ChromeDriver();
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.manage().window().maximize();

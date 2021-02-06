@@ -18,13 +18,13 @@ import java.util.logging.Logger;
 public class Main {
 
 
-    private final static String URL_BASE = "https://www.bilbaokirolak.com/";
-    private final static String URL_LOGIN = URL_BASE + "bkonline2/doLogin.jsp";
-    private final static String USER_NAME = "53291283F";
-    private final static String USER_PASS = "28032020";
-    private final static LocalDate NEXTDAY = LocalDate.now().plusDays(2);
-    private final static DayOfWeek DAYOFWEEK = NEXTDAY.getDayOfWeek();
-    private final static String NEXTDAYFORMATTED = NEXTDAY.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    private static final String URL_BASE = "https://www.bilbaokirolak.com/";
+    private static final String URL_LOGIN = URL_BASE + "bkonline2/doLogin.jsp";
+    private static final String USER_NAME = "53291283F";
+    private static final String USER_PASS = "28032020";
+    private static final LocalDate NEXTDAY = LocalDate.now().plusDays(2);
+    private static final DayOfWeek DAYOFWEEK = NEXTDAY.getDayOfWeek();
+    private static final String NEXTDAYFORMATTED = NEXTDAY.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
     private final static Logger LOGGER = Logger.getLogger(Main.class.getName());
 
@@ -38,7 +38,7 @@ public class Main {
 
     private static void findReservation(UserType user, CenterType centerType, SportType sportType) {
         //Create a new drive
-        LOGGER.info("Method: Main " + user + centerType + sportType);
+        LOGGER.info("Method: findReservation " + user + " " + centerType + " " + sportType);
         System.setProperty("webdriver.chrome.driver", "/home/leonardo/Downloads/chromedriver_linux64/chromedriver");
         WebDriver driver = new ChromeDriver();
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
@@ -59,21 +59,28 @@ public class Main {
             driver.get("https://www.bilbaokirolak.com/bkonline2/cambio_usuario.jsp?familiar=" + user.getValue());
             driver.get("https://www.bilbaokirolak.com/bkonline2/reservas/reservar_horas.jsp?codCom=" + centerType.getValue() + "&codAct=" + sportType.getValue() + "&numAut=&fechaReserva=" + NEXTDAYFORMATTED);
         }
-        LOGGER.info("Find all ul");
         List<WebElement> webElements = driver.findElements(By.xpath("/html/body/div[1]/div[15]/div[2]/div[1]/ul//li/a[contains(@href,'bkonline2')]"));
         for (WebElement element : webElements) {
             String[] hourText = element.getText().split("-");
-            if (hourText[0].trim().equals(DAYOFWEEK.getValue() > 4 ? "11:00" : "12:00")) {
+            if (hourText[0].trim().equals(DAYOFWEEK.getValue() > 4 ? "11:00" : "18:00")) {
                 //call reservation page
-                if (openReservation(element, driver))
-                    break;
+                if (!checkElementIsDisabled(element)) {
+                    if (openReservation(element, driver, user))
+                        break;
+                }
             }
+
         }
         driver.close();
     }
 
-    private static boolean openReservation(WebElement element, WebDriver driver) {
-        LOGGER.info("Method: openReservation " + element.getText());
+    private static boolean checkElementIsDisabled(WebElement element) {
+        LOGGER.info("Method: checkElementIsDisabled ");
+        return element.getAttribute("class").contains("ui-state-disabled");
+    }
+
+    private static boolean openReservation(WebElement element, WebDriver driver, UserType userType) {
+        LOGGER.info("Method: openReservation at: " + element.getText() + "User: " + userType);
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("window.open('" + element.getAttribute("href") + "')");
@@ -90,19 +97,17 @@ public class Main {
                 WebElement reservationConfirmationButton = driver.findElement(By.xpath("/html/body/div[1]/div[15]/div[2]/form/div/div/a[2]"));
                 reservationConfirmationButton.click();
                 //ALERT CONFIRMATION
-                //Alert alert = driver.switchTo().alert();
-                //alert.accept(); // for OK
                 // modal confirmation
                 WebElement reservationModalConfirmationButton = driver.findElement(By.xpath("/html/body/div[1]/div[32]/div/div/div/a[2]"));
                 reservationModalConfirmationButton.click();
                 WebElement errorMesage = driver.findElement(By.xpath("/html/body/div[1]/div[15]/div[2]/div/h3"));
                 if (errorMesage.getText().equals("No se ha podido guardar su solicitud")) {
-                    LOGGER.info("Reservation not found");
+                    LOGGER.info("Reservation not found " + userType);
                     driver.close(); //closing child window
                     driver.switchTo().window(parentWindow); //switch to parent window
                     return false;
                 } else {
-                    LOGGER.info("Reservation has been saved");
+                    LOGGER.info("Reservation has been saved " + userType);
                     //parent close
                     driver.close();
                     driver.switchTo().window(parentWindow);

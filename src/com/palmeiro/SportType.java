@@ -1,8 +1,8 @@
 package com.palmeiro;
 
 public enum SportType {
-    SWIMMING(19),
-    POOL(26);
+    SWIMMING(26),
+    POOL(19);
 
     private final int value;
 

@@ -5,6 +5,8 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -32,7 +34,7 @@ public class Main {
         LOGGER.info("Method: Main");
         new Thread(() -> findReservation(UserType.PAOLA, CenterType.ATXURI, SportType.SWIMMING)).start();
         new Thread(() -> findReservation(UserType.LEO, CenterType.ATXURI, SportType.SWIMMING)).start();
-        //new Thread(() -> findReservation(UserType.TEO, CenterType.MIRIBILLA, SportType.SWIMMING)).start();
+        new Thread(() -> findReservation(UserType.TEO, CenterType.ATXURI, SportType.SWIMMING)).start();
 
     }
 
@@ -63,6 +65,7 @@ public class Main {
         List<WebElement> webElements = driver.findElements(By.xpath("/html/body/div[1]/div[15]/div[2]/div[1]/ul//li/a[contains(@href,'bkonline2')]"));
         for (WebElement element : webElements) {
             String[] hourText = element.getText().split("-");
+            System.out.println(element.getAttribute("href"));
             if (hourText[0].trim().equals(DAYOFWEEK.getValue() > 4 ? "11:00" : "18:00")) {
                 //call reservation page
                 if (!checkElementIsDisabled(element)) {
@@ -99,7 +102,11 @@ public class Main {
                 reservationConfirmationButton.click();
                 //ALERT CONFIRMATION
                 // modal confirmation
+                WebDriverWait wait = new WebDriverWait(driver, 2);
+
                 WebElement reservationModalConfirmationButton = driver.findElement(By.xpath("/html/body/div[1]/div[32]/div/div/div/a[2]"));
+                wait.until(ExpectedConditions.elementToBeClickable(reservationModalConfirmationButton));
+
                 reservationModalConfirmationButton.click();
                 WebElement errorMesage = driver.findElement(By.xpath("/html/body/div[1]/div[15]/div[2]/div/h3"));
                 if (errorMesage.getText().equals("No se ha podido guardar su solicitud")) {

@@ -45,7 +45,7 @@ public class Main {
 
         WebDriver driver = new ChromeDriver();
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        driver.manage().window().maximize();
+        //driver.manage().window().maximize();
         LOGGER.info("Open login page");
         driver.get(URL_LOGIN);
         LOGGER.info("Setting userName and Password");
@@ -55,7 +55,7 @@ public class Main {
         passText.sendKeys(USER_PASS);
         WebElement submitButton = driver.findElement(By.xpath("/html/body/div[1]/div[3]/form/div[2]/div/button"));
         submitButton.click();
-        LOGGER.info("Open reservation page");
+        LOGGER.info("Open reservation page " +user);
         if (UserType.PAOLA == user) {
             driver.get("https://www.bilbaokirolak.com/bkonline2/reservas/reservar_horas.jsp?codCom=" + centerType.getValue() + "&codAct=" + sportType.getValue() + "&numAut=&fechaReserva=" + NEXTDAYFORMATTED);
         } else {
@@ -64,9 +64,9 @@ public class Main {
         }
         List<WebElement> webElements = driver.findElements(By.xpath("/html/body/div[1]/div[15]/div[2]/div[1]/ul//li/a[contains(@href,'bkonline2')]"));
         for (WebElement element : webElements) {
+            LOGGER.info(element.getAttribute("href"));
             String[] hourText = element.getText().split("-");
-            System.out.println(element.getAttribute("href"));
-            if (hourText[0].trim().equals(DAYOFWEEK.getValue() > 4 ? "11:00" : "18:00")) {
+            if (hourText[0].trim().equals(DAYOFWEEK.getValue() > 5 ? "11:00" : "16:00")) {
                 //call reservation page
                 if (!checkElementIsDisabled(element)) {
                     if (openReservation(element, driver, user))
@@ -109,8 +109,9 @@ public class Main {
 
                 reservationModalConfirmationButton.click();
                 WebElement errorMesage = driver.findElement(By.xpath("/html/body/div[1]/div[15]/div[2]/div/h3"));
+                LOGGER.info("Error message " + errorMesage);
                 if (errorMesage.getText().equals("No se ha podido guardar su solicitud")) {
-                    LOGGER.info("Reservation not found " + userType);
+                    LOGGER.info("Reservation error " + userType);
                     driver.close(); //closing child window
                     driver.switchTo().window(parentWindow); //switch to parent window
                     return false;

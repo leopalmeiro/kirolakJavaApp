@@ -32,13 +32,13 @@ public class Main {
 
     public static void main(String[] args) {
         LOGGER.info("Method: Main");
-        new Thread(() -> findReservation(UserType.PAOLA, CenterType.ATXURI, SportType.SWIMMING)).start();
-        new Thread(() -> findReservation(UserType.LEO, CenterType.ATXURI, SportType.SWIMMING)).start();
-        new Thread(() -> findReservation(UserType.TEO, CenterType.ATXURI, SportType.SWIMMING)).start();
+        new Thread(() -> findReservation(UserType.PAOLA, CenterType.ATXURI, SportType.SWIMMING, "18:00", "14:00")).start();
+        new Thread(() -> findReservation(UserType.LEO, CenterType.ATXURI, SportType.SWIMMING, "07:00", "13:00")).start();
+        //new Thread(() -> findReservation(UserType.TEO, CenterType.ATXURI, SportType.SWIMMING)).start();
 
     }
 
-    private static void findReservation(UserType user, CenterType centerType, SportType sportType) {
+    private static void findReservation(UserType user, CenterType centerType, SportType sportType, String timeWeek, String timeWeekend) {
         //Create a new drive
         LOGGER.info("Method: findReservation " + user + " " + centerType + " " + sportType);
         System.setProperty("webdriver.chrome.driver", "/home/leonardo/Downloads/chromedriver_linux64/chromedriver");
@@ -66,7 +66,8 @@ public class Main {
         for (WebElement element : webElements) {
             LOGGER.info(element.getAttribute("href"));
             String[] hourText = element.getText().split("-");
-            if (hourText[0].trim().equals(DAYOFWEEK.getValue() > 5 ? "11:00" : "16:00")) {
+
+            if (hourText[0].trim().equals(DAYOFWEEK.getValue() <= 5 ? timeWeek : timeWeekend)) {
                 //call reservation page
                 if (!checkElementIsDisabled(element)) {
                     if (openReservation(element, driver, user))
